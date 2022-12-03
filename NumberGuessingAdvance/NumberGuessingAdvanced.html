@@ -1,0 +1,189 @@
+
+
+
+<!DOCTYPE html>
+  <html lang="en-us">
+    <head>
+      <meta charset="utf-8">
+  
+      <title>Number guessing game</title>
+  
+      <style>
+        html {
+          font-family: sans-serif;
+        }
+  
+        body {
+          width: 50%;
+          max-width: 800px;
+          min-width: 480px;
+          margin: 0 auto;
+        }
+        
+        .form input[type="number"] {
+          width: 200px;
+        }
+        .lastResult {
+          color: rgb(255, 255, 255);
+          padding: 5px;
+        }
+        .hiddenData{
+          display: none;
+        }
+        
+      </style>
+  </head>
+  
+  <!-- Začněte zde a implementujte hru popsanou v článku. Dále stejným způsobem implementujte hru co má následující popis: 
+    hráč snaží odhadnout náhodně zvolené číslo r, kde r  je větší než 0 a menší než 1001;
+    hráč píše svůj odhad do speciálního pole;
+    hráč má pouze jeden pokus a vybere-li číslo špatně - hra se skončí;
+    hráč má k dispozici jiné pole kam může zadávat čísla mezi 1 a 99;
+    po té co hráč napíše číslo do druhého pole (označme to číslo a) 
+    se mu vypíše výsledek r mod a  a uloží se do seznamu jíž získaných výsledků;
+    hráč musí vždy mít k dispozici veškeré získané výsledky popsané v předchozím odstavci;
+    hráč má vždy možnost začít hru znova;
+    BONUS ❗ možná na velkou 1❗ : navrhněte způsob 
+    jak by hráč měl postupovat aby vždy vyhrával ve výše popsané hře, 
+    ideálně co nejmenším počtem kroků 
+    (jedním krokem se myslí jedno zadávaní dvojciferného čísla do druhého pole) 
+-->
+  <body>
+      <h1>Number guessing game</h1>
+      <p>We have selected a random number between 1 and 1000. See if you can guess it in 10 turns or fewer. We'll tell you if your guess was too high or too low.</p>
+  
+      <div class="form">
+        <label for="guessField">Enter a guess (r): </label>
+        <input type="number" min="1" max="1000" required id="guessField1" class="guessField1">
+      </div>
+      <br>
+      <div class="hiddenData">
+        <div class="resultParas">
+          <p class="guesses"></p>
+          <p class="lastResult"></p>
+          <p class="lowOrHi"></p>
+        </div>
+  
+        <div class="form" id="divisor">
+          <label for="guessField">Enter a divisor (a): </label>
+          <input type="number" min="1" max="99" required id="guessField2" class="guessField2">
+          <input type="button" value="Get r mod a" class="getModBtn">
+        </div>
+        <p class="resultMod"></p>
+  
+      </div>
+      
+      <!-- <br> -->
+
+      <input type="submit" value="Submit guess" class="guessSubmit">
+  
+      <!-- JS -->
+      <script>
+        //var
+          let randomNumber = Math.floor(Math.random() * 1000) + 1;
+          const guesses = document.querySelector('.guesses');
+          const lastResult = document.querySelector('.lastResult');
+          const lowOrHi = document.querySelector('.lowOrHi');
+
+          const hiddenData = document.querySelector('.hiddenData');
+          const guessSubmit = document.querySelector('.guessSubmit');
+          const guessField = document.querySelector('.guessField');
+          
+          let guessCount = 1;
+          let resetButton;
+
+          let divisor = document.getElementById('divisor');
+          let getModBtn = document.querySelector('.getModBtn');
+          const resultMod = document.querySelector('.resultMod');
+          guessSubmit.addEventListener('click', checkGuess);
+          let resultFinal;
+          // let userDivisor = +guessField2.value; //string to number, add +
+          getModBtn.addEventListener('click', getMod);
+
+        //functions
+          function checkGuess(){
+              hiddenData.style.display = 'block';
+              const userGuess = +guessField1.value;
+              if(guessCount === 1)
+              {
+                guesses.textContent = 'Your last number is: ' ;
+              }
+                guesses.textContent += userGuess + ' ' ;
+
+              if(userGuess === randomNumber)
+              {
+                lastResult.textContent = 'Congrats! You got it right';
+                lastResult.style.backgroundColor = 'green';
+                lowOrHi.textContent = '';
+                setGameOver();
+              } else if(guessCount === 10)
+              {
+                  lastResult.textContent = '!!!GAME OVER!!!';
+                  lowOrHi.textContent = '';
+                  setGameOver();
+              }
+              else
+              {
+                guessField1.disabled = true;
+                lastResult.textContent = 'Wrong! ';
+                lastResult.style.backgroundColor = 'red';
+                if(userGuess < randomNumber)
+                {
+                  lowOrHi.textContent = 'Last guess was too low';
+                } else if (userGuess > randomNumber)
+                {
+                  lowOrHi.textContent = 'Last guess was too high';
+                }
+                
+                lowOrHi.textContent += ' Enter a random number as divisor from 1 to 99 to get the mod so u can get the hint: ';
+                
+              }
+              guessCount++;
+          }
+
+          function getMod(){
+            let userDivisor = +guessField2.value;
+            resultFinal = randomNumber % userDivisor;
+            resultMod.textContent = `Remains: ${resultFinal}`;
+            console.log(randomNumber);
+            console.log(userDivisor);
+            guessField1.disabled = false;
+            guessField1.value = '';
+            guessField2.value = '';
+          }
+          function setGameOver() {
+              guessField1.disabled = true;
+              guessSubmit.disabled = true;
+              resetButton = document.createElement('button');
+              resetButton.textContent = 'Start new game';
+              document.body.append(resetButton);
+              resetButton.addEventListener('click', resetGame);
+              guessField1.focus();
+
+          }
+
+          function resetGame(){
+              guessCount = 1;
+              guessField1.disabled = false;
+              guessSubmit.disabled = false;
+              guessField1.value = '';
+              guesses.textContent = '';
+              const resetParas = document.querySelectorAll('.resultParas p');
+              for (const resetPara of resetParas) {
+                  resetPara.textContent = '';
+              }
+
+              resetButton.parentNode.removeChild(resetButton);
+
+              lastResult.style.backgroundColor = 'white';
+              randomNumber = Math.floor(Math.random() * 1000)+1;
+              // divisor.style.display = 'none';
+              // getModBtn.style.display = 'none';
+              // resultMod.style.display = 0;
+              // resultMod.style.display = 'none';
+              // lastResult.style.display = 'none';
+          }
+          // Your JavaScript goes here
+      </script>
+  </body>
+</html>
